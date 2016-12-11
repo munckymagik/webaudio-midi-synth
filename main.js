@@ -77,12 +77,15 @@ const main = ({ api, midiAccess }) => {
   lfo.gain.connect(carrier.osc.frequency)
   carrier.gain.connect(api.ctx.destination)
 
+  let numKeysDown = 0
+
   midiAccess.inputs.forEach((input) => {
     input.onmidimessage = (event) => {
       const midiMessage = decodeMidiMessage(event)
       console.log('midiMessage', midiMessage)
 
       if (midiMessage.isDown()) {
+        numKeysDown += 1
         carrier.gain.gain.value = velocityToGain(midiMessage.velocity)
         const freq = midiNoteToFrequency(midiMessage.note)
         console.log('freq', freq)
@@ -90,7 +93,8 @@ const main = ({ api, midiAccess }) => {
         carrier.osc.frequency.value = freq
         lfo.osc.frequency.value = freq
       } else if (midiMessage.isRelease()) {
-        carrier.gain.gain.value = 0
+        numKeysDown -= 1
+        if (numKeysDown === 0) carrier.gain.gain.value = 0
       }
     }
   })
