@@ -53,6 +53,16 @@ const decodeMidiEvent = ({ data }) => {
   }
 }
 
+const scale = (inMin, inMax, outMin, outMax) => {
+  const inRange = inMax - inMin
+  const outRange = outMax - outMin
+  return (inValue) => {
+    return (outRange * (inValue / inRange)) + outMin
+  }
+}
+
+const velocityToGain = scale(0, 127, 0, 1)
+
 const main = ({ api, midiAccess }) => {
   console.log('Ready')
 
@@ -69,7 +79,8 @@ const main = ({ api, midiAccess }) => {
       console.log('isDown?', midiEvent.isDown())
       console.log('isRelease?', midiEvent.isRelease())
 
-      carrier.gain.gain.value = (midiEvent.isDown()) ? 0.1 : 0
+      carrier.gain.gain.value =
+        (midiEvent.isDown()) ? velocityToGain(midiEvent.velocity) : 0
     }
   })
 }
