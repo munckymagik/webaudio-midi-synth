@@ -72,7 +72,7 @@ const main = ({ api, midiAccess }) => {
   console.log('Ready')
 
   const carrier = api.createOsc('sine', 440, 0)
-  const lfo = api.createOsc('sine', 880, 300)
+  const lfo = api.createOsc('sine', 440, 300)
 
   lfo.gain.connect(carrier.osc.frequency)
   carrier.gain.connect(api.ctx.destination)
