@@ -63,6 +63,11 @@ const rangeMapper = (inMin, inMax, outMin, outMax) => {
 
 const velocityToGain = rangeMapper(0, 127, 0, 1)
 
+// See https://newt.phys.unsw.edu.au/jw/notes.html
+const midiA4 = 69
+const freqA4 = 440
+const midiNoteToFrequency = (midiNote) => freqA4 * Math.pow(2, ((midiNote - midiA4) / 12))
+
 const main = ({ api, midiAccess }) => {
   console.log('Ready')
 
@@ -77,8 +82,16 @@ const main = ({ api, midiAccess }) => {
       const midiMessage = decodeMidiMessage(event)
       console.log('midiMessage', midiMessage)
 
-      carrier.gain.gain.value =
-        (midiMessage.isDown()) ? velocityToGain(midiMessage.velocity) : 0
+      if (midiMessage.isDown()) {
+        carrier.gain.gain.value = velocityToGain(midiMessage.velocity)
+        const freq = midiNoteToFrequency(midiMessage.note)
+        console.log('freq', freq)
+
+        carrier.osc.frequency.value = freq
+        lfo.osc.frequency.value = freq
+      } else if (midiMessage.isRelease()) {
+        carrier.gain.gain.value = 0
+      }
     }
   })
 }
