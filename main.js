@@ -25,7 +25,7 @@ const promiseDomContentLoaded = (state) =>
 
 const initAudioApi = (state) => {
   state.api = createAudioApi(new AudioContext());
-  return state 
+  return state
 }
 
 const initMidi = (state) => {
@@ -72,8 +72,10 @@ const main = ({ api, midiAccess }) => {
   console.log('Ready')
 
   const carrier = api.createOsc('sine', 440, 0)
-  const lfo = api.createOsc('sine', 440, 300)
+  const lfo = api.createOsc('sine', 440, 1000)
+  const lfoMod = api.createOsc('sine', 5, 1)
 
+  lfoMod.gain.connect(lfo.osc.frequency)
   lfo.gain.connect(carrier.osc.frequency)
   carrier.gain.connect(api.ctx.destination)
 
@@ -91,7 +93,7 @@ const main = ({ api, midiAccess }) => {
         console.log('freq', freq)
 
         carrier.osc.frequency.value = freq
-        lfo.osc.frequency.value = freq
+        lfo.osc.frequency.value = (freq / 12) * 6
       } else if (midiMessage.isRelease()) {
         numKeysDown -= 1
         if (numKeysDown === 0) carrier.gain.gain.value = 0
